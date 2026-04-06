@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.ProcessaEstoque">
+   <children>
+      <Label alignment="CENTER" layoutX="218.0" layoutY="25.0" style="-fx-background-color: gray;" text="Processar Estoque" textAlignment="CENTER" textFill="WHITE" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <TableView fx:id="tabProdutos" layoutX="110.0" layoutY="152.0" prefHeight="169.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <columns>
+          <TableColumn fx:id="colID" prefWidth="48.0" text="ID" />
+          <TableColumn fx:id="colCodBarras" prefWidth="104.0" text="Cód.Barras" />
+          <TableColumn fx:id="colNome" prefWidth="147.20001220703125" text="Nome" />
+          <TableColumn fx:id="colDescricao" prefWidth="134.39996337890625" text="Decrição" />
+          <TableColumn fx:id="colCategoria" prefWidth="100.800048828125" text="Categoria" />
+          <TableColumn fx:id="colQuantidade" prefWidth="68.800048828125" text="Qtd" />
+        </columns>
+      </TableView>
+      <Label layoutX="17.0" layoutY="67.0" text="Pesquisar">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <TextField fx:id="txtBuscar" layoutX="17.0" layoutY="95.0" prefHeight="26.0" prefWidth="450.0" promptText="Pesquisar" />
+      <TextField fx:id="txtID" disable="true" layoutX="17.0" layoutY="152.0" prefHeight="26.0" prefWidth="54.0" promptText="000000" />
+      <TextField fx:id="txtCodBarras" disable="true" layoutX="79.0" layoutY="153.0" prefHeight="26.0" prefWidth="102.0" promptText="0000000000000" />
+      <TextField fx:id="txtNome" disable="true" layoutX="193.0" layoutY="153.0" prefHeight="26.0" prefWidth="175.0" />
+      <TextField fx:id="txtQtd" layoutX="383.0" layoutY="153.0" prefHeight="26.0" prefWidth="54.0" />
+      <Button fx:id="btnBuscar" layoutX="480.0" layoutY="95.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="101.0" text="Buscar">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+      <Button fx:id="btnProcessar" layoutX="449.0" layoutY="187.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="137.0" text="Processar Estoque">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+      <Label layoutX="193.0" layoutY="130.0" text="Produto">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label layoutX="79.0" layoutY="130.0" text="Cód.Barras">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label layoutX="17.0" layoutY="130.0" text="ID">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label layoutX="385.0" layoutY="130.0" text="Qtd">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <RadioButton layoutX="448.0" layoutY="156.0" mnemonicParsing="false" selected="true" text="Entrada">
+         <toggleGroup>
+            <ToggleGroup fx:id="rdOperacao" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton layoutX="525.0" layoutY="156.0" mnemonicParsing="false" text="Saida" toggleGroup="$rdOperacao" />
+      <Label layoutX="449.0" layoutY="130.0" text="Operação">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

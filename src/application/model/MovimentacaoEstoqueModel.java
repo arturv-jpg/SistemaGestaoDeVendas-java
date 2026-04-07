@@ -2,6 +2,10 @@ package application.model;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import application.conexao;
 import javafx.scene.control.Alert;
@@ -37,7 +41,7 @@ public class MovimentacaoEstoqueModel {
 	public void setNomeProd(String nomeProd) {this.nomeProd=nomeProd;}
 	public void setData(String data) {this.data=data;}
 	public void setQuantidade(int quantidade) {this.quantidade=quantidade;}
-	public void tipo(String tipo) {this.tipo=tipo;}
+	public void setTipo(String tipo) {this.tipo=tipo;}
 	
 	public void InsereMovimentacao() {
 		try(Connection conn = conexao.getConnection();
@@ -57,5 +61,44 @@ public class MovimentacaoEstoqueModel {
 			mensagem.setContentText("Estoque Processado!");
 			mensagem.showAndWait();
 		}catch(Exception e) {e.printStackTrace();}
+	}
+	
+	public List<MovimentacaoEstoqueModel> HistoricoMovimentacao
+	(int idProd,LocalDate dataInicio, LocalDate dataFim) {
+		List <MovimentacaoEstoqueModel> movimentacao = 
+				new ArrayList<MovimentacaoEstoqueModel>();
+		try(Connection conn = conexao.getConnection();
+			PreparedStatement consulta = 
+					conn.prepareStatement("select DATE_FORMAT(m.dataHora,'%d/%m/%y') as data,"
+							+ "m.id,m.idProd,p.nome,m.quantidade,"+
+					"(case when m.tipo=0 then 'Entrada' "+
+					"	when m.tipo=1  then 'Saida'  "+
+					"	else 'Não Informado' end) as tipo"+
+					" from produto p inner join movimentacaoestoque m"+
+					" on p.id=m.idProd where p.id=? and m.dataHora between ? and ?");
+				){
+			consulta.setInt(1, idProd);
+			consulta.setDate(2, java.sql.Date.valueOf(dataInicio));
+			consulta.setDate(3, java.sql.Date.valueOf(dataFim));
+			ResultSet resultado=consulta.executeQuery();
+			while (resultado.next()) {
+				MovimentacaoEstoqueModel m =new MovimentacaoEstoqueModel(
+						resultado.getInt("id"), 
+						resultado.getInt("idProd"), 
+						resultado.getString("nome"), 
+						resultado.getString("data"), 
+						resultado.getInt("quantidade"), 
+						resultado.getString("tipo")) ;
+				this.setID(resultado.getInt("id"));
+				this.setNomeProd(resultado.getString("nome"));
+				this.setIdProd(resultado.getInt("idProd"));
+				this.setTipo(resultado.getString("tipo"));
+				this.setData(resultado.getString("data"));
+				this.setQuantidade(resultado.getInt("quantidade"));
+				movimentacao.add(m);
+			}
+			
+		} catch(Exception e) {e.printStackTrace();}
+		return movimentacao;
 	}
 }

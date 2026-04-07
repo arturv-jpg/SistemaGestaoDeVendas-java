@@ -3,6 +3,7 @@ package application.controller;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,9 @@ import application.model.ProdutoModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
@@ -18,11 +22,13 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 
 public class ProcessaEstoque {
 
     @FXML private Button btnBuscar;
     @FXML private Button btnProcessar;
+    @FXML private Button btnHistorico;
     @FXML private TextField txtBuscar;
     @FXML private TextField txtCodBarras;
     @FXML private TextField txtID;
@@ -80,6 +86,29 @@ public class ProcessaEstoque {
     		ListarProdutosTab(null);
     	});
     	btnBuscar.setOnAction(e->{Pesquisar();});
+    	btnHistorico.setOnAction(e->{Historico();});
+    }
+    
+   //metodo para abrir tela de historico 
+    public void Historico() {
+    	//Data atual
+    	LocalDate hoje = LocalDate.now();
+    	//Primeiro dia do Mês
+    	LocalDate primeiroDia=hoje.withDayOfMonth(1);
+    	//Ultimo dia do Mês
+    	LocalDate ultimoDia = hoje.withDayOfMonth(hoje.lengthOfMonth());
+    	try {
+    		FXMLLoader loader = new FXMLLoader(
+    				getClass().getResource("/application/view/HistoricoProcessamento.fxml"));
+    		Parent root = loader.load();
+    		HistoricoController controller = loader.getController();
+    		controller.buscarHistorico(produto.getID(), primeiroDia, ultimoDia);
+    		Stage stage= new Stage();
+    		stage.setScene(new Scene (root));
+    		stage.show();
+        } catch(Exception e) {
+    		e.printStackTrace();
+    	}
     }
   //METODO PARA BUSCAR O CADASTRO DO PRODUTO
     public void Pesquisar() {

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="500.0" prefWidth="700.0"
+ xmlns="http://javafx.com/javafx/25"
+ xmlns:fx="http://javafx.com/fxml/1"
+ fx:controller="application.controller.CadastroClienteController">
+
+   <children>
+
+      <Label text="Cadastro de Clientes" layoutX="200" layoutY="20">
+         <font>
+            <Font size="18"/>
+         </font>
+      </Label>
+
+      <!-- CAMPOS -->
+      <TextField fx:id="txtID" layoutX="30" layoutY="80" promptText="ID" disable="true"/>
+      <TextField fx:id="txtNome" layoutX="100" layoutY="80" promptText="Nome"/>
+      <TextField fx:id="txtCPF" layoutX="300" layoutY="80" promptText="CPF"/>
+      <TextField fx:id="txtEmail" layoutX="450" layoutY="80" promptText="Email"/>
+
+      <ComboBox fx:id="cbStatus" layoutX="100" layoutY="120" prefWidth="150"/>
+
+      <!-- BOTÕES -->
+      <Button text="Salvar" layoutX="270" layoutY="120" onAction="#Salvar"/>
+      <Button text="Novo" layoutX="350" layoutY="120" onAction="#Novo"/>
+      <Button text="Buscar" layoutX="530" layoutY="50" onAction="#Buscar"/>
+      <Button text="Excluir"
+        layoutX="430"
+        layoutY="120"
+        onAction="#Excluir"/>
+      <!-- BUSCA -->
+      <TextField fx:id="txtBuscar" layoutX="30" layoutY="50" prefWidth="480" promptText="Buscar cliente..."/>
+
+      <!-- TABELA -->
+      <TableView fx:id="tabClientes" layoutX="30" layoutY="180" prefWidth="640" prefHeight="150">
+         <columns>
+            <TableColumn fx:id="colID" text="ID" prefWidth="50"/>
+            <TableColumn fx:id="colNome" text="Nome" prefWidth="150"/>
+            <TableColumn fx:id="colCPF" text="CPF" prefWidth="150"/>
+            <TableColumn fx:id="colEmail" text="Email" prefWidth="150"/>
+            <TableColumn fx:id="colStatus" text="Status" prefWidth="100"/>
+         </columns>
+      </TableView>
+
+      <!-- HISTÓRICO -->
+      <Label text="Últimas compras" layoutX="30" layoutY="340"/>
+      <ListView fx:id="listaHistorico" layoutX="30" layoutY="360" prefWidth="640" prefHeight="100"/>
+
+   </children>
+</AnchorPane>

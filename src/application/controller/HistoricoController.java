@@ -1,72 +1,80 @@
 package application.controller;
 
+import java.net.URL;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import application.model.MovimentacaoEstoqueModel;
-import application.model.ProdutoModel;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
 
-public class HistoricoController {
+public class HistoricoController implements Initializable {
 
-    @FXML private Button btnBuscar;
-    @FXML private TableColumn<MovimentacaoEstoqueModel, String> colData;
+    @FXML private TableView<MovimentacaoEstoqueModel> tabHistorico;
+
     @FXML private TableColumn<MovimentacaoEstoqueModel, Integer> colID;
     @FXML private TableColumn<MovimentacaoEstoqueModel, Integer> colIdProd;
-    @FXML private TableColumn<MovimentacaoEstoqueModel, String> colNome;
     @FXML private TableColumn<MovimentacaoEstoqueModel, Integer> colQtd;
-    @FXML private TableColumn<MovimentacaoEstoqueModel, String> colTipo;
-    @FXML private DatePicker dtFinal;
-    @FXML private DatePicker dtInicio;
-    @FXML private Label lblProd;
-    @FXML private TableView<MovimentacaoEstoqueModel> tabHistorico;
-    private ObservableList<MovimentacaoEstoqueModel> listaMovimentacao;
-    private LocalDate hoje,primeiroDia, ultimoDia;
-    MovimentacaoEstoqueModel Movimentacao = new MovimentacaoEstoqueModel(0, 0, null, null, 0, null);
-    
-    @FXML
-    public void initialize() {
-    	//ATRIBUI O TIPO DE INFORMAÇÃO DOS GETTERS DA MODEL EX.: return this.id;
-    	colID.setCellValueFactory(new PropertyValueFactory<>("ID"));
-    	colIdProd.setCellValueFactory(new PropertyValueFactory<>("idProd"));
-    	colData.setCellValueFactory(new PropertyValueFactory<>("data"));
-    	colNome.setCellValueFactory(new PropertyValueFactory<>("nomeProd"));
-    	colTipo.setCellValueFactory(new PropertyValueFactory<>("tipo"));
-    	colQtd.setCellValueFactory(new PropertyValueFactory<>("quantidade"));
-    	//Data atual
-    	hoje = LocalDate.now();
-    	//Primeiro dia do Mês
-    	primeiroDia=hoje.withDayOfMonth(1);
-    	//Ultimo dia do Mês
-    	ultimoDia = hoje.withDayOfMonth(hoje.lengthOfMonth());  
-    	
-    	dtInicio.setValue(primeiroDia);
-    	dtFinal.setValue(ultimoDia);
-    	
-    	btnBuscar.setOnAction(e-> buscarHistorico(Movimentacao.getIdProd(), 
-    					dtInicio.getValue(), 
-    					dtFinal.getValue())
-    	);
 
+    @FXML private TableColumn<MovimentacaoEstoqueModel, String> colData;
+    @FXML private TableColumn<MovimentacaoEstoqueModel, String> colNome;
+    @FXML private TableColumn<MovimentacaoEstoqueModel, String> colTipo;
+
+    @FXML private DatePicker dtInicio;
+    @FXML private DatePicker dtFinal;
+
+    @FXML private Label lblProd;
+
+    private int idProduto;
+
+    // 🔹 RECEBE O PRODUTO SELECIONADO
+    public void setProduto(int id, String nome) {
+        this.idProduto = id;
+        lblProd.setText(nome);
     }
-    
-    public void buscarHistorico(int idProd, LocalDate dataInicio, LocalDate dataFinal) {
-    	List <MovimentacaoEstoqueModel> listaHitorico = 
-    			Movimentacao.HistoricoMovimentacao(idProd, dataInicio, dataFinal);
-    	listaMovimentacao= FXCollections.observableArrayList(listaHitorico);
-    	tabHistorico.setItems(listaMovimentacao);
-    	lblProd.setText(Movimentacao.getNomeProd());
-    	dtInicio.setValue(dataInicio);
-    	dtFinal.setValue(dataFinal);
-    	
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+
+        colID.setCellValueFactory(d -> new javafx.beans.property.SimpleIntegerProperty(d.getValue().getID()).asObject());
+        colIdProd.setCellValueFactory(d -> new javafx.beans.property.SimpleIntegerProperty(d.getValue().getIdProd()).asObject());
+        colQtd.setCellValueFactory(d -> new javafx.beans.property.SimpleIntegerProperty(d.getValue().getQuantidade()).asObject());
+
+        colData.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getData()));
+        colNome.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getNomeProd()));
+        colTipo.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getTipo()));
+    }
+
+    // 🔹 BOTÃO BUSCAR (FXML)
+    @FXML
+    public void buscar() {
+
+        if(dtInicio.getValue() == null || dtFinal.getValue() == null) {
+            alerta("Selecione as datas!");
+            return;
+        }
+
+        buscarHistorico(idProduto, dtInicio.getValue(), dtFinal.getValue());
+    }
+
+    // 🔹 MÉTODO QUE ESTAVA FALTANDO (RESOLVE SEU ERRO)
+    public void buscarHistorico(int idProd, LocalDate inicio, LocalDate fim) {
+
+        MovimentacaoEstoqueModel m = new MovimentacaoEstoqueModel(0,0,null,null,0,null);
+
+        List<MovimentacaoEstoqueModel> lista =
+                m.HistoricoMovimentacao(idProd, inicio, fim);
+
+        tabHistorico.setItems(FXCollections.observableArrayList(lista));
+    }
+
+    // 🔹 ALERTA PADRÃO
+    private void alerta(String msg) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setContentText(msg);
+        a.showAndWait();
     }
 }
-

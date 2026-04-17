@@ -6,28 +6,58 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.StackPane?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.SistemaController">
-   <children>
-      <AnchorPane prefHeight="200.0" prefWidth="200.0" />
-      <MenuBar StackPane.alignment="TOP_CENTER">
-        <menus>
-          <Menu mnemonicParsing="false" text="Inicio">
-            <items>
-              <MenuItem fx:id="itemSair" mnemonicParsing="false" onAction="#Sair" text="Sair" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Cadastros">
-            <items>
-              <MenuItem fx:id="itemProdutos" mnemonicParsing="false" onAction="#AbrirCadastroProduto" text="Produtos" />
-                  <MenuItem fx:id="itemClientes" mnemonicParsing="false" text="Clientes" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Operações">
-            <items>
-              <MenuItem fx:id="itemProcessaEstoque" mnemonicParsing="false" text="Processar estoque" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
-   </children>
+<StackPane xmlns="http://javafx.com/javafx/24"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="application.controller.SistemaController"
+           prefHeight="400.0" prefWidth="600.0">
+
+    <children>
+
+        <AnchorPane prefHeight="400.0" prefWidth="600.0" />
+        <MenuBar StackPane.alignment="TOP_CENTER">
+            <menus>
+   
+                <Menu text="Início">
+                    <items>
+                        <MenuItem fx:id="itemSair"
+                                  text="Sair"
+                                  onAction="#Sair"/>
+                    </items>
+                </Menu>
+
+                <Menu text="Cadastros">
+                    <items>
+                        <MenuItem fx:id="itemProdutos"
+                                  text="Produtos"
+                                  onAction="#AbrirCadastroProduto"/>
+
+                        <MenuItem fx:id="itemClientes"
+                                  text="Clientes"
+                                  onAction="#AbrirCadastroCliente"/>
+                                  
+                        <MenuItem fx:id="itemUsuarios"
+                                  text="Usuários"
+                                  onAction="#AbrirCadastroUsuario"/>
+                                <Menu text="Vendas">
+    <items>
+        <MenuItem text="Nova Venda" onAction="#AbrirVenda"/>
+    </items>
+</Menu>
+                    </items>
+                </Menu>
+            
+                <Menu text="Operações">
+                    <items>
+                        <MenuItem fx:id="itemProcessaEstoque"
+                                  text="Processar Estoque"
+                                  onAction="#AbrirProcessaEstoque"/>
+                    </items>
+                </Menu>
+
+            </menus>
+
+        </MenuBar>
+
+    </children>
+
 </StackPane>

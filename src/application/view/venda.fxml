@@ -73,6 +73,12 @@
                 prefWidth="180"
                 style="-fx-background-color: #c0392b; -fx-text-fill: white;"
                 onAction="#cancelarVenda"/>
+                
+        <Button text="Cancelar Última Venda"
+        layoutX="420" layoutY="390"
+        prefWidth="180"
+        style="-fx-background-color: #e67e22; -fx-text-fill: white;"
+        onAction="#cancelarUltimaVenda"/>
 
     </children>
 </AnchorPane>

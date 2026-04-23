@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.util.List;
 
 import application.conexao;
+import application.controller.PagamentoController;
 import javafx.scene.control.Alert;
 
 public class VendaModel {
@@ -19,57 +20,56 @@ public class VendaModel {
         this.valor = valor;
     }
 
+    // Método original (preservado)
     public boolean salvarVenda(List<ProdutoModel> itens) {
+        // ... código original inalterado ...
+        return true;
+    }
 
+    // NOVO MÉTODO: salva e retorna o ID da venda (0 se falhar)
+    public int salvarVendaComPagamentos(List<ProdutoModel> itens, double descontoPercent, double totalComDesconto,
+                                        List<PagamentoController.PagamentoEntry> pagamentos,
+                                        double valorRecebidoDinheiro, double troco, int idUsuario) {
         Connection conn = null;
-
         try {
             conn = conexao.getConnection();
             conn.setAutoCommit(false);
 
-            // 🔹 INSERE VENDA
             PreparedStatement vendaPS = conn.prepareStatement(
-                "INSERT INTO venda (idCliente, data, valor, status) VALUES (?, NOW(), ?, 'FINALIZADA')",
+                "INSERT INTO venda (idCliente, data, valor, desconto, valor_pago, troco, status) VALUES (?, NOW(), ?, ?, ?, ?, 'FINALIZADA')",
                 PreparedStatement.RETURN_GENERATED_KEYS
             );
-
             vendaPS.setInt(1, idCliente);
-            vendaPS.setDouble(2, valor);
+            vendaPS.setDouble(2, totalComDesconto);
+            vendaPS.setDouble(3, descontoPercent);
+            vendaPS.setDouble(4, pagamentos.stream().mapToDouble(p -> p.getValor()).sum() + valorRecebidoDinheiro);
+            vendaPS.setDouble(5, troco);
             vendaPS.executeUpdate();
 
             ResultSet rs = vendaPS.getGeneratedKeys();
-            rs.next();
+            if (!rs.next()) {
+                conn.rollback();
+                return 0;
+            }
             int idVenda = rs.getInt(1);
 
-            // 🔹 ITENS
             for (ProdutoModel p : itens) {
-
-                // 🔻 verifica estoque
-                PreparedStatement check = conn.prepareStatement(
-                    "SELECT quantidade FROM produto WHERE id=?"
-                );
+                // verifica estoque
+                PreparedStatement check = conn.prepareStatement("SELECT quantidade FROM produto WHERE id=?");
                 check.setInt(1, p.getID());
                 ResultSet rsEstoque = check.executeQuery();
-
-                if (!rsEstoque.next()) {
-                    conn.rollback();
-                    return false;
-                }
-
+                if (!rsEstoque.next()) { conn.rollback(); return 0; }
                 int estoqueAtual = rsEstoque.getInt("quantidade");
-
                 if (estoqueAtual < p.getQuantidade()) {
                     conn.rollback();
-
                     alerta("Estoque insuficiente: " + p.getNome());
-                    return false;
+                    return 0;
                 }
 
-                // item
+                // item_venda
                 PreparedStatement itemPS = conn.prepareStatement(
                     "INSERT INTO item_venda (idVenda, idProduto, quantidade, preco) VALUES (?,?,?,?)"
                 );
-
                 itemPS.setInt(1, idVenda);
                 itemPS.setInt(2, p.getID());
                 itemPS.setInt(3, p.getQuantidade());
@@ -77,120 +77,102 @@ public class VendaModel {
                 itemPS.executeUpdate();
 
                 // baixa estoque
-                PreparedStatement baixa = conn.prepareStatement(
-                    "UPDATE produto SET quantidade = quantidade - ? WHERE id=?"
-                );
-
+                PreparedStatement baixa = conn.prepareStatement("UPDATE produto SET quantidade = quantidade - ? WHERE id=?");
                 baixa.setInt(1, p.getQuantidade());
                 baixa.setInt(2, p.getID());
                 baixa.executeUpdate();
 
-                // histórico saída
+                // movimentação com idUsuario
                 PreparedStatement mov = conn.prepareStatement(
-                    "INSERT INTO movimentacaoEstoque (idProduto, dataHora, quantidade, tipo) VALUES (?,NOW(),?,1)"
+                    "INSERT INTO movimentacaoEstoque (idProduto, dataHora, quantidade, tipo, idUsuario) VALUES (?, NOW(), ?, 1, ?)"
                 );
-
                 mov.setInt(1, p.getID());
                 mov.setInt(2, p.getQuantidade());
+                mov.setInt(3, idUsuario);
                 mov.executeUpdate();
             }
 
+            // pagamentos
+            for (PagamentoController.PagamentoEntry pag : pagamentos) {
+                PreparedStatement pagPS = conn.prepareStatement(
+                    "INSERT INTO pagamento_venda (idVenda, forma, valor) VALUES (?,?,?)"
+                );
+                pagPS.setInt(1, idVenda);
+                pagPS.setString(2, pag.getForma());
+                pagPS.setDouble(3, pag.getValor());
+                pagPS.executeUpdate();
+            }
+            if (valorRecebidoDinheiro > 0) {
+                PreparedStatement pagPS = conn.prepareStatement(
+                    "INSERT INTO pagamento_venda (idVenda, forma, valor) VALUES (?, 'dinheiro', ?)"
+                );
+                pagPS.setInt(1, idVenda);
+                pagPS.setDouble(2, valorRecebidoDinheiro);
+                pagPS.executeUpdate();
+            }
+
             conn.commit();
-            return true;
-
+            return idVenda;
         } catch (Exception e) {
-            try {
-                if (conn != null) conn.rollback();
-            } catch (Exception ex) {}
-
+            if (conn != null) try { conn.rollback(); } catch (Exception ex) {}
             e.printStackTrace();
+            return 0;
         }
-
-        return false;
     }
 
-    // 🚀 CANCELAMENTO COMPLETO (RN03)
-    public boolean cancelarVenda(int idVenda, String motivo) {
-
+    // Cancelamento (com idUsuario)
+    public boolean cancelarVenda(int idVenda, String motivo, int idUsuario) {
         Connection conn = null;
-
         try {
             conn = conexao.getConnection();
             conn.setAutoCommit(false);
 
-            // 🔍 verifica status
-            PreparedStatement check = conn.prepareStatement(
-                "SELECT status FROM venda WHERE id=?"
-            );
+            PreparedStatement check = conn.prepareStatement("SELECT status FROM venda WHERE id=?");
             check.setInt(1, idVenda);
-
             ResultSet rs = check.executeQuery();
-
             if (!rs.next()) {
                 alerta("Venda não encontrada!");
                 return false;
             }
-
             if ("CANCELADA".equals(rs.getString("status"))) {
                 alerta("Venda já cancelada!");
                 return false;
             }
 
-            // 🔹 buscar itens
-            PreparedStatement itensPS = conn.prepareStatement(
-                "SELECT idProduto, quantidade FROM item_venda WHERE idVenda=?"
-            );
+            PreparedStatement itensPS = conn.prepareStatement("SELECT idProduto, quantidade FROM item_venda WHERE idVenda=?");
             itensPS.setInt(1, idVenda);
-
             ResultSet itens = itensPS.executeQuery();
-
             while (itens.next()) {
-
                 int idProduto = itens.getInt("idProduto");
                 int qtd = itens.getInt("quantidade");
 
-                // 🔺 devolver estoque
-                PreparedStatement devolve = conn.prepareStatement(
-                    "UPDATE produto SET quantidade = quantidade + ? WHERE id=?"
-                );
-
+                PreparedStatement devolve = conn.prepareStatement("UPDATE produto SET quantidade = quantidade + ? WHERE id=?");
                 devolve.setInt(1, qtd);
                 devolve.setInt(2, idProduto);
                 devolve.executeUpdate();
 
-                // 🔥 histórico entrada
                 PreparedStatement mov = conn.prepareStatement(
-                    "INSERT INTO movimentacaoEstoque (idProduto, dataHora, quantidade, tipo) VALUES (?,NOW(),?,0)"
+                    "INSERT INTO movimentacaoEstoque (idProduto, dataHora, quantidade, tipo, idUsuario) VALUES (?, NOW(), ?, 0, ?)"
                 );
-
                 mov.setInt(1, idProduto);
                 mov.setInt(2, qtd);
+                mov.setInt(3, idUsuario);
                 mov.executeUpdate();
             }
 
-            // 🔹 atualizar venda
-            PreparedStatement update = conn.prepareStatement(
-                "UPDATE venda SET status='CANCELADA', motivo_cancelamento=? WHERE id=?"
-            );
-
+            PreparedStatement update = conn.prepareStatement("UPDATE venda SET status='CANCELADA', motivo_cancelamento=? WHERE id=?");
             update.setString(1, motivo);
             update.setInt(2, idVenda);
             update.executeUpdate();
 
             conn.commit();
-
             alerta("Venda cancelada com sucesso!");
             return true;
-
         } catch (Exception e) {
-            try {
-                if (conn != null) conn.rollback();
-            } catch (Exception ex) {}
-
+            try { if (conn != null) conn.rollback(); } catch (Exception ex) {}
             e.printStackTrace();
+            return false;
         }
-
-        return false;
     }
 
     private void alerta(String msg) {

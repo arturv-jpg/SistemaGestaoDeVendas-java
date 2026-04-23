@@ -21,10 +21,8 @@ public class CadastroClienteController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
-        // 🔥 Preenche ComboBox
         cbStatus.setItems(FXCollections.observableArrayList("Ativo", "Inativo"));
-        cbStatus.setValue("Ativo"); // padrão
+        cbStatus.setValue("Ativo");
 
         colID.setCellValueFactory(data -> new javafx.beans.property.SimpleIntegerProperty(data.getValue().getId()).asObject());
         colNome.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getNome()));
@@ -33,15 +31,21 @@ public class CadastroClienteController implements Initializable {
         colStatus.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getStatus()));
 
         tabClientes.setOnMouseClicked(e -> selecionar());
-
         atualizarTabela("");
     }
 
     @FXML
     public void Salvar() {
+        if(txtNome.getText().isEmpty() || txtCPF.getText().isEmpty() || txtEmail.getText().isEmpty()) {
+            String erro = "";
+            if(txtNome.getText().isEmpty()) erro += "\nNome";
+            if(txtCPF.getText().isEmpty()) erro += "\nCPF";
+            if(txtEmail.getText().isEmpty()) erro += "\nEmail";
+            alerta("Preencha os campos obrigatórios:" + erro);
+            return;
+        }
 
         String status = cbStatus.getValue() != null ? cbStatus.getValue() : "Ativo";
-
         int id = txtID.getText().isEmpty() ? 0 : Integer.parseInt(txtID.getText());
 
         ClienteModel c = new ClienteModel(
@@ -52,8 +56,14 @@ public class CadastroClienteController implements Initializable {
             status
         );
 
-        if(!ClienteModel.validarCPF(txtCPF.getText())) {
-            alerta("CPF inválido!");
+        // 🔥 VALIDAÇÃO AGORA ACEITA CPF OU CNPJ
+        if(!ClienteModel.validarDocumento(txtCPF.getText())) {
+            alerta("CPF ou CNPJ inválido!");
+            return;
+        }
+
+        if(!txtEmail.getText().contains("@")) {
+            alerta("Email inválido! Deve conter '@'.");
             return;
         }
 
@@ -63,32 +73,27 @@ public class CadastroClienteController implements Initializable {
             } else {
                 alerta("Cliente cadastrado!");
             }
-
             atualizarTabela("");
             Novo();
         } else {
-            alerta("CPF ou email já cadastrado!");
+            alerta("CPF/CNPJ ou email já cadastrado!");
         }
     }
+
     @FXML
     public void Excluir() {
-
         if(txtID.getText().isEmpty()) {
             alerta("Selecione um cliente!");
             return;
         }
-
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setContentText("Deseja excluir este cliente?");
         confirm.showAndWait();
-
         if(confirm.getResult() == ButtonType.OK) {
-
             ClienteModel c = new ClienteModel(
                 Integer.parseInt(txtID.getText()),
                 null, null, null, null
             );
-
             if(c.excluir()) {
                 alerta("Cliente excluído!");
                 atualizarTabela("");
@@ -110,7 +115,7 @@ public class CadastroClienteController implements Initializable {
         txtNome.clear();
         txtCPF.clear();
         txtEmail.clear();
-        cbStatus.setValue("Ativo"); // 🔥 padrão ao limpar
+        cbStatus.setValue("Ativo");
         listaHistorico.getItems().clear();
     }
 
@@ -121,15 +126,12 @@ public class CadastroClienteController implements Initializable {
 
     private void selecionar() {
         ClienteModel c = tabClientes.getSelectionModel().getSelectedItem();
-
         if(c != null) {
             txtID.setText(String.valueOf(c.getId()));
             txtNome.setText(c.getNome());
             txtCPF.setText(c.getCpf());
             txtEmail.setText(c.getEmail());
             cbStatus.setValue(c.getStatus());
-
-            // 🔥 HISTÓRICO
             List<String> hist = ClienteModel.historico(c.getId());
             listaHistorico.setItems(FXCollections.observableArrayList(hist));
         }

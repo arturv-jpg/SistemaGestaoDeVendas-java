@@ -79,4 +79,25 @@ public class UsuarioModel {
 
         return null;
     }
+ 
+    public static UsuarioModel autenticarGerente(String senha) {
+        try (Connection conn = conexao.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                 "SELECT * FROM usuario WHERE tipo = 'gerente' AND senha = ?")) {
+            ps.setString(1, senha);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new UsuarioModel(
+                    rs.getInt("id"),
+                    rs.getString("nome"),
+                    rs.getString("login"),
+                    rs.getString("senha"),
+                    rs.getString("tipo")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

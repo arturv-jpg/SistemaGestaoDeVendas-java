@@ -20,9 +20,8 @@
       <!-- CAMPOS -->
       <TextField fx:id="txtID" layoutX="30" layoutY="80" promptText="ID" disable="true"/>
       <TextField fx:id="txtNome" layoutX="100" layoutY="80" promptText="Nome"/>
-      <TextField fx:id="txtCPF" layoutX="300" layoutY="80" promptText="CPF"/>
+      <TextField fx:id="txtCPF" layoutX="300" layoutY="80" promptText="CPF ou CNPJ" />
       <TextField fx:id="txtEmail" layoutX="450" layoutY="80" promptText="Email"/>
-
       <ComboBox fx:id="cbStatus" layoutX="100" layoutY="120" prefWidth="150"/>
 
       <!-- BOTÕES -->

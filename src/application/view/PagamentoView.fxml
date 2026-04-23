@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="application.controller.PagamentoController"
+            prefHeight="400.0" prefWidth="500.0">
+
+    <children>
+        <Label text="Finalizar Venda - Pagamento" layoutX="20" layoutY="20" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+        <Label text="Total da Venda:" layoutX="20" layoutY="60"/>
+        <Label fx:id="lblTotal" layoutX="150" layoutY="60" style="-fx-font-weight: bold;"/>
+
+        <Label text="Desconto (por cento):" layoutX="20" layoutY="100"/>
+        <TextField fx:id="txtDescontoPercent" layoutX="150" layoutY="95" prefWidth="80" promptText="0"/>
+        <Label layoutX="240" layoutY="100" text=" %"/>
+
+        <Label text="Valor com Desconto:" layoutX="20" layoutY="140"/>
+        <Label fx:id="lblTotalComDesconto" layoutX="150" layoutY="140" style="-fx-font-weight: bold;"/>
+
+        <Separator layoutX="20" layoutY="170" prefWidth="460"/>
+
+        <Label text="Formas de Pagamento" layoutX="20" layoutY="190" style="-fx-font-weight: bold;"/>
+
+        <TableView fx:id="tabelaPagamentos" layoutX="20" layoutY="210" prefHeight="100" prefWidth="460">
+            <columns>
+                <TableColumn fx:id="colForma" text="Forma" prefWidth="150"/>
+                <TableColumn fx:id="colValor" text="Valor (R$)" prefWidth="150"/>
+                <TableColumn fx:id="colAcao" text="Acao" prefWidth="150"/>
+            </columns>
+        </TableView>
+
+        <Button text="Adicionar Pagamento" layoutX="20" layoutY="320" onAction="#adicionarPagamento"/>
+        
+        <Label text="Valor Recebido (Dinheiro):" layoutX="20" layoutY="360"/>
+        <TextField fx:id="txtValorRecebido" layoutX="200" layoutY="355" prefWidth="100" promptText="R$"/>
+        <Label text="Troco:" layoutX="320" layoutY="360"/>
+        <Label fx:id="lblTroco" layoutX="380" layoutY="360" style="-fx-font-weight: bold;"/>
+
+        <Button text="Finalizar" layoutX="200" layoutY="390" onAction="#finalizar"/>
+        <Button text="Cancelar" layoutX="300" layoutY="390" onAction="#cancelar"/>
+    </children>
+</AnchorPane>

@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -17,10 +18,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 
 public class CadastroProdutoController {
-	
-	@FXML private AnchorPane paneFundo;
+    
+    @FXML private AnchorPane paneFundo;
 
-	@FXML private TextField txtID;
+    @FXML private TextField txtID;
     @FXML private TextField txtQuantidade;
     @FXML private TextField txtBuscar;
     @FXML private TextField txtCategoria;
@@ -28,6 +29,15 @@ public class CadastroProdutoController {
     @FXML private TextField txtNome;
     @FXML private TextField txtCodBarras;
     @FXML private TextField txtPreco;
+    
+    // NOVOS CAMPOS
+    @FXML private TextField txtPrecoCusto;
+    @FXML private TextField txtMargemLucro;
+    @FXML private TextField txtEstoqueMinimo;
+    @FXML private Button btnCalcularPreco;
+    @FXML private Button btnBuscar;
+    @FXML private Button btnSalvar;
+    @FXML private Button btnExcluir;
 
     @FXML private TableColumn<ProdutoModel, Integer> colID;
     @FXML private TableColumn<ProdutoModel, String> colNome;
@@ -40,24 +50,21 @@ public class CadastroProdutoController {
     @FXML private TableView<ProdutoModel> tabProdutos;
 
     private ObservableList<ProdutoModel> listaProdutos;
-
     DecimalFormat formatoReal = new DecimalFormat("#,##0.00");
-
     ProdutoModel produto = new ProdutoModel(0, null, null, null, null, 0, 0);
 
     // ================= SALVAR =================
     public void Salvar() {
-
         if(txtNome.getText().isEmpty() || txtCodBarras.getText().isEmpty() || 
            txtDescricao.getText().isEmpty() || txtCategoria.getText().isEmpty() || 
            txtPreco.getText().isEmpty()) {
 
-            String erro="";
-            if(txtNome.getText().isEmpty()) erro+="\nNome";
-            if(txtCodBarras.getText().isEmpty()) erro+="\nCódigo de Barras";
-            if(txtDescricao.getText().isEmpty()) erro+="\nDescrição";
-            if(txtCategoria.getText().isEmpty()) erro+="\nCategoria";
-            if(txtPreco.getText().isEmpty()) erro+="\nPreço";
+            String erro = "";
+            if(txtNome.getText().isEmpty()) erro += "\nNome";
+            if(txtCodBarras.getText().isEmpty()) erro += "\nCódigo de Barras";
+            if(txtDescricao.getText().isEmpty()) erro += "\nDescrição";
+            if(txtCategoria.getText().isEmpty()) erro += "\nCategoria";
+            if(txtPreco.getText().isEmpty()) erro += "\nPreço";  // ✅ CORRIGIDO (era "\Preço")
 
             Alert mensagem = new Alert(Alert.AlertType.WARNING);
             mensagem.setContentText("Preencha os campos:" + erro);
@@ -70,16 +77,42 @@ public class CadastroProdutoController {
         produto.setDescricao(txtDescricao.getText());
         produto.setCategoria(txtCategoria.getText());
         produto.setPreco(Double.parseDouble(txtPreco.getText().replace(",", ".")));
+        
+        // NOVOS CAMPOS
+        if(!txtPrecoCusto.getText().isEmpty()) {
+            produto.setPrecoCusto(Double.parseDouble(txtPrecoCusto.getText().replace(",", ".")));
+        }
+        if(!txtMargemLucro.getText().isEmpty()) {
+            produto.setMargemLucro(Double.parseDouble(txtMargemLucro.getText().replace(",", ".")));
+        }
+        if(!txtEstoqueMinimo.getText().isEmpty()) {
+            produto.setEstoqueMinimo(Integer.parseInt(txtEstoqueMinimo.getText()));
+        }
 
-        // IMPORTANTE: só define 0 se for novo
         if(produto.getID() == 0){
             produto.setQuantidade(0);
         }
 
         produto.Salvar();
-
         Novo();
         ListarProdutosTab(null);
+    }
+
+    // ================= CALCULAR PREÇO =================
+    @FXML
+    public void calcularPreco() {
+        try {
+            if(txtPrecoCusto.getText().isEmpty() || txtMargemLucro.getText().isEmpty()) {
+                alerta("Preencha o Preço de Custo e a Margem de Lucro (%);");
+                return;
+            }
+            double custo = Double.parseDouble(txtPrecoCusto.getText().replace(",", "."));
+            double margem = Double.parseDouble(txtMargemLucro.getText().replace(",", "."));
+            double precoVenda = custo * (1 + margem / 100);
+            txtPreco.setText(formatoReal.format(precoVenda));
+        } catch(NumberFormatException e) {
+            alerta("Valores inválidos para cálculo!");
+        }
     }
 
     // ================= PESQUISAR =================
@@ -95,6 +128,10 @@ public class CadastroProdutoController {
             txtCategoria.setText(produto.getCategoria());
             txtPreco.setText(formatoReal.format(produto.getPreco()));
             txtQuantidade.setText(String.valueOf(produto.getQuantidade()));
+            // NOVOS
+            txtPrecoCusto.setText(formatoReal.format(produto.getPrecoCusto()));
+            txtMargemLucro.setText(String.valueOf(produto.getMargemLucro()));
+            txtEstoqueMinimo.setText(String.valueOf(produto.getEstoqueMinimo()));
         } else {
             ListarProdutosTab(null);
         }
@@ -102,16 +139,13 @@ public class CadastroProdutoController {
 
     // ================= EXCLUIR =================
     public void Excluir() {
-
         if (produto.getID() <= 0) {
             Alert mensagem = new Alert(Alert.AlertType.WARNING);
             mensagem.setContentText("Nenhum produto selecionado!");
             mensagem.showAndWait();
             return;
         }
-
         produto.Excluir();
-
         Novo();
         ListarProdutosTab(null);
     }
@@ -119,21 +153,16 @@ public class CadastroProdutoController {
     // ================= CLICK FORA =================
     @FXML
     public void clicarFundo(javafx.scene.input.MouseEvent event) {
-
         Object alvo = event.getTarget();
-
         if (!(alvo instanceof TableView) &&
             !(alvo instanceof TableRow) &&
             !(alvo instanceof TableCell)) {
-
             Novo();
         }
     }
 
-    // ================= INITIALIZE =================
     @FXML
     public void initialize() {
-
         colID.setCellValueFactory(new PropertyValueFactory<>("ID"));
         colNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
         colCodBarras.setCellValueFactory(new PropertyValueFactory<>("codBarras"));
@@ -158,16 +187,38 @@ public class CadastroProdutoController {
             }
         });
 
-        ListarProdutosTab(null);
+        // 🔥 ALERTA DE ESTOQUE MÍNIMO: pinta a célula da quantidade em vermelho se <= estoque_minimo
+        colQtd.setCellFactory(col -> new TableCell<ProdutoModel, Integer>() {
+            @Override
+            protected void updateItem(Integer qtd, boolean empty) {
+                super.updateItem(qtd, empty);
+                if (empty || qtd == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    setText(String.valueOf(qtd));
+                    // Obtém o produto da linha atual
+                    ProdutoModel produto = getTableView().getItems().get(getIndex());
+                    if (produto != null && produto.getEstoqueMinimo() > 0 && qtd <= produto.getEstoqueMinimo()) {
+                        setStyle("-fx-background-color: #ffcccc; -fx-text-fill: #cc0000;"); // vermelho claro
+                    } else {
+                        setStyle("");
+                    }
+                }
+            }
+        });
 
+        ListarProdutosTab(null);
         txtBuscar.setOnAction(e -> Pesquisar());
+        
+        if(btnCalcularPreco != null) {
+            btnCalcularPreco.setOnAction(e -> calcularPreco());
+        }
 
         tabProdutos.getSelectionModel().selectedItemProperty().addListener(
             (obs, oldSelection, newSelection) -> {
                 if (newSelection != null) {
-
                     produto = newSelection;
-
                     txtID.setText(String.format("%06d", produto.getID()));
                     txtNome.setText(produto.getNome());
                     txtCodBarras.setText(produto.getCodBarras());
@@ -175,6 +226,9 @@ public class CadastroProdutoController {
                     txtCategoria.setText(produto.getCategoria());
                     txtQuantidade.setText(String.valueOf(produto.getQuantidade()));
                     txtPreco.setText(formatoReal.format(produto.getPreco()));
+                    txtPrecoCusto.setText(formatoReal.format(produto.getPrecoCusto()));
+                    txtMargemLucro.setText(String.valueOf(produto.getMargemLucro()));
+                    txtEstoqueMinimo.setText(String.valueOf(produto.getEstoqueMinimo()));
                 }
             });
     }
@@ -188,9 +242,7 @@ public class CadastroProdutoController {
 
     // ================= NOVO =================
     public void Novo() {
-
         produto = new ProdutoModel(0, null, null, null, null, 0, 0);
-
         txtID.clear();
         txtNome.clear();
         txtCodBarras.clear();
@@ -198,7 +250,16 @@ public class CadastroProdutoController {
         txtCategoria.clear();
         txtPreco.clear();
         txtQuantidade.clear();
-
+        // NOVOS
+        txtPrecoCusto.clear();
+        txtMargemLucro.clear();
+        txtEstoqueMinimo.clear();
         tabProdutos.getSelectionModel().clearSelection();
+    }
+    
+    private void alerta(String msg) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setContentText(msg);
+        a.showAndWait();
     }
 }

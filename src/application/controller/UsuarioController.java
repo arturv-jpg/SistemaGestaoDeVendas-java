@@ -1,5 +1,10 @@
 package application.controller;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import application.conexao;
 import application.model.UsuarioModel;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -41,6 +46,13 @@ public class UsuarioController {
             a.show();
             return;
         }
+        // Verifica se login já existe
+        if (loginExiste(txtLogin.getText())) {
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setContentText("Este login já está em uso! Escolha outro.");
+            a.show();
+            return;
+        }
 
         usuario = new UsuarioModel(
                 0,
@@ -57,6 +69,18 @@ public class UsuarioController {
         ok.show();
 
         novo();
+    }
+    // Método auxiliar para verificar login existente
+    private boolean loginExiste(String login) {
+        try (Connection conn = conexao.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT id FROM usuario WHERE login = ?")) {
+            ps.setString(1, login.trim());
+            ResultSet rs = ps.executeQuery();
+            return rs.next();  // retorna true se encontrou
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     // LIMPAR CAMPOS

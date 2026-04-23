@@ -8,6 +8,7 @@ import java.util.List;
 
 import application.conexao;
 import application.model.ProdutoModel;
+import application.model.UsuarioModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -46,8 +47,14 @@ public class ProcessaEstoque {
     @FXML private ToggleGroup rdOperacao;
 
     private ObservableList<ProdutoModel> listaProdutos;
+    private UsuarioModel usuarioLogado; // NOVO: usuário que está operando
 
     ProdutoModel produto = new ProdutoModel(0, null, null, null, null, 0, 0);
+
+    // Setter para receber o usuário logado (chamado pelo SistemaController ao abrir a tela)
+    public void setUsuarioLogado(UsuarioModel usuario) {
+        this.usuarioLogado = usuario;
+    }
 
     @FXML
     public void initialize() {
@@ -61,33 +68,25 @@ public class ProcessaEstoque {
 
         ListarProdutosTab(null);
 
-        // 🔥 começa desabilitado
         btnHistorico.setDisable(true);
 
-        // 🔥 seleção da tabela
         tabProdutos.getSelectionModel().selectedItemProperty().addListener(
             (obs, selecao, novaSelecao) -> {
-
                 if (novaSelecao != null) {
-
                     produto = novaSelecao;
-
                     txtID.setText(String.format("%06d", produto.getID()));
                     txtNome.setText(produto.getNome());
                     txtCodBarras.setText(produto.getCodBarras());
                     txtQtd.setText("0");
-
-                    btnHistorico.setDisable(false); // habilita
-
+                    btnHistorico.setDisable(false);
                 } else {
-                    btnHistorico.setDisable(true); // desabilita
+                    btnHistorico.setDisable(true);
                 }
             }
         );
 
-        // 🔥 PROCESSAR
+        // PROCESSAR
         btnProcessar.setOnAction(e -> {
-
             if (txtID.getText().isEmpty()) {
                 alerta("Selecione um produto!");
                 return;
@@ -98,19 +97,21 @@ public class ProcessaEstoque {
             }
             try {
                 int qtd = Integer.parseInt(txtQtd.getText());
-
                 if (qtd <= 0) {
                     alerta("Quantidade deve ser maior que zero!");
                     return;
                 }
                 produto.setQuantidade(qtd);
-
                 RadioButton operacao = (RadioButton) rdOperacao.getSelectedToggle();
 
-                produto.ProcessaEstoque(operacao.getText());
+                // 🔥 PASSA O ID DO USUÁRIO LOGADO
+                if (usuarioLogado == null) {
+                    alerta("Usuário não identificado!");
+                    return;
+                }
+                produto.ProcessaEstoque(operacao.getText(), usuarioLogado.getId());
 
                 atualizarTabela();
-
             } catch (NumberFormatException ex) {
                 alerta("Digite apenas números na quantidade!");
             }
@@ -120,74 +121,54 @@ public class ProcessaEstoque {
         btnHistorico.setOnAction(e -> Historico());
     }
 
-    // 🔥 ABRIR HISTÓRICO
     @FXML
     public void Historico() {
-
         if (txtID.getText().isEmpty()) return;
-
         try {
-
             int id = Integer.parseInt(txtID.getText());
             String nome = txtNome.getText();
 
-            FXMLLoader loader = new FXMLLoader(
-            	    getClass().getResource("/application/view/HistoricoProcessamento.fxml")
-            	);
-            
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/application/view/HistoricoProcessamento.fxml"));
             Parent root = loader.load();
 
             HistoricoController controller = loader.getController();
-
             controller.setProduto(id, nome);
-
-            controller.buscarHistorico(
-                id,
-                java.time.LocalDate.now().minusDays(30),
-                java.time.LocalDate.now()
-            );
+            controller.buscarHistorico(id, java.time.LocalDate.now().minusDays(30), java.time.LocalDate.now());
 
             Stage stage = new Stage();
             stage.setTitle("Histórico");
             stage.setScene(new Scene(root));
             stage.show();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // 🔍 PESQUISAR
     public void Pesquisar() {
-
         if (!txtBuscar.getText().isEmpty()) {
-
-            produto.Buscar(txtBuscar.getText());
+            boolean encontrou = produto.Buscar(txtBuscar.getText());
             ListarProdutosTab(txtBuscar.getText());
-
-            txtID.setText(String.format("%06d", produto.getID()));
-            txtNome.setText(produto.getNome());
-            txtCodBarras.setText(produto.getCodBarras());
-            txtQtd.setText("0");
-
+            if (encontrou) {
+                txtID.setText(String.format("%06d", produto.getID()));
+                txtNome.setText(produto.getNome());
+                txtCodBarras.setText(produto.getCodBarras());
+                txtQtd.setText("0");
+            } else {
+                alerta("Produto não encontrado!");
+                limparCampos();
+            }
         } else {
             ListarProdutosTab(null);
         }
     }
 
-    // 🔥 LISTAR PRODUTOS (BANCO)
     public List<ProdutoModel> ListarProdutos(String valor) {
-
         List<ProdutoModel> produtos = new ArrayList<>();
-
         try (Connection conn = conexao.getConnection();
              PreparedStatement consulta = conn.prepareStatement("SELECT * FROM produto");
              PreparedStatement consultaWhere = conn.prepareStatement(
-                 "SELECT * FROM produto WHERE nome LIKE ? OR descricao LIKE ? OR categoria LIKE ?"
-             )) {
-
+                 "SELECT * FROM produto WHERE nome LIKE ? OR descricao LIKE ? OR categoria LIKE ?")) {
             ResultSet resultado;
-
             if (valor == null) {
                 resultado = consulta.executeQuery();
             } else {
@@ -196,7 +177,6 @@ public class ProcessaEstoque {
                 consultaWhere.setString(3, "%" + valor + "%");
                 resultado = consultaWhere.executeQuery();
             }
-
             while (resultado.next()) {
                 ProdutoModel p = new ProdutoModel(
                     resultado.getInt("id"),
@@ -209,22 +189,19 @@ public class ProcessaEstoque {
                 );
                 produtos.add(p);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return produtos;
     }
 
-    //  JOGAR NA TABELA
     public void ListarProdutosTab(String valor) {
-        List<ProdutoModel> produtos = ListarProdutos(valor);
+        ProdutoModel p = new ProdutoModel();
+        List<ProdutoModel> produtos = p.ListarProdutos(valor);
         listaProdutos = FXCollections.observableArrayList(produtos);
         tabProdutos.setItems(listaProdutos);
     }
 
-    //  LIMPAR CAMPOS
     private void limparCampos() {
         txtBuscar.clear();
         txtID.clear();
@@ -233,18 +210,19 @@ public class ProcessaEstoque {
         txtQtd.setText("0");
         btnHistorico.setDisable(true);
     }
-private void alerta(String msg) {
-    javafx.scene.control.Alert a = new javafx.scene.control.Alert(
-        javafx.scene.control.Alert.AlertType.WARNING
-    );
-    a.setContentText(msg);
-    a.showAndWait();
-}
-private void atualizarTabela() {
 
-    List<ProdutoModel> produtos = ListarProdutos(null);
-    listaProdutos.setAll(produtos);
+    private void alerta(String msg) {
+        javafx.scene.control.Alert a = new javafx.scene.control.Alert(
+            javafx.scene.control.Alert.AlertType.WARNING
+        );
+        a.setContentText(msg);
+        a.showAndWait();
+    }
 
-    txtQtd.setText("0");
-}
+    private void atualizarTabela() {
+        ProdutoModel p = new ProdutoModel();
+        List<ProdutoModel> produtos = p.ListarProdutos(null);
+        listaProdutos.setAll(produtos);
+        txtQtd.setText("0");
+    }
 }

@@ -27,10 +27,10 @@ public class HistoricoController implements Initializable {
     @FXML private DatePicker dtFinal;
 
     @FXML private Label lblProd;
-
+    @FXML private Button btnBuscar;
+    
     private int idProduto;
 
-    // 🔹 RECEBE O PRODUTO SELECIONADO
     public void setProduto(int id, String nome) {
         this.idProduto = id;
         lblProd.setText(nome);
@@ -38,40 +38,30 @@ public class HistoricoController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
         colID.setCellValueFactory(d -> new javafx.beans.property.SimpleIntegerProperty(d.getValue().getID()).asObject());
         colIdProd.setCellValueFactory(d -> new javafx.beans.property.SimpleIntegerProperty(d.getValue().getIdProd()).asObject());
         colQtd.setCellValueFactory(d -> new javafx.beans.property.SimpleIntegerProperty(d.getValue().getQuantidade()).asObject());
-
         colData.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getData()));
         colNome.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getNomeProd()));
         colTipo.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getTipo()));
     }
 
-    // 🔹 BOTÃO BUSCAR (FXML)
     @FXML
     public void buscar() {
-
         if(dtInicio.getValue() == null || dtFinal.getValue() == null) {
             alerta("Selecione as datas!");
             return;
         }
-
         buscarHistorico(idProduto, dtInicio.getValue(), dtFinal.getValue());
     }
 
-    // 🔹 MÉTODO QUE ESTAVA FALTANDO (RESOLVE SEU ERRO)
     public void buscarHistorico(int idProd, LocalDate inicio, LocalDate fim) {
-
-        MovimentacaoEstoqueModel m = new MovimentacaoEstoqueModel(0,0,null,null,0,null);
-
-        List<MovimentacaoEstoqueModel> lista =
-                m.HistoricoMovimentacao(idProd, inicio, fim);
-
+        // 🔥 CORREÇÃO: construtor agora exige 7 parâmetros (inclui idUsuario)
+        MovimentacaoEstoqueModel m = new MovimentacaoEstoqueModel(0, 0, null, null, 0, null, 0);
+        List<MovimentacaoEstoqueModel> lista = m.HistoricoMovimentacao(idProd, inicio, fim);
         tabHistorico.setItems(FXCollections.observableArrayList(lista));
     }
 
-    // 🔹 ALERTA PADRÃO
     private void alerta(String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setContentText(msg);

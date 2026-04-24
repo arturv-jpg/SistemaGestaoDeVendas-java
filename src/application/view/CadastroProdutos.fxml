@@ -1,69 +1,119 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<AnchorPane fx:id="paneFundo" onMouseClicked="#clicarFundo" prefHeight="520.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.CadastroProdutoController">
-   <children>
-      <Label alignment="CENTER" layoutY="10.0" prefWidth="700.0" style="-fx-background-color: Gray;" text="Cadastro de Produtos" textAlignment="CENTER" textFill="WHITE">
-         <font><Font name="System Bold" size="18.0" /></font>
-      </Label>
+<BorderPane fx:id="paneFundo"
+            onMouseClicked="#clicarFundo"
+            xmlns="http://javafx.com/javafx/24"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="application.controller.CadastroProdutoController"
+            style="-fx-background-color: #f4f6f8;">
 
-      <Label layoutX="20.0" layoutY="50.0" text="Buscar Produto"><font><Font name="System Bold" size="12.0" /></font></Label>
-      <TextField fx:id="txtBuscar" layoutX="20.0" layoutY="70.0" prefWidth="500.0" promptText="Digite nome, codigo de barras, descricao ou categoria" />
-      <Button fx:id="btnBuscar" layoutX="530.0" layoutY="70.0" onAction="#Pesquisar" prefWidth="140.0" text="Buscar"><font><Font name="System Bold" size="12.0" /></font></Button>
+    <!-- 🔹 TOPO -->
+    <top>
+        <HBox style="-fx-padding: 15; -fx-background-color: #ffffff;">
+            <Label text="Cadastro de Produtos"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+        </HBox>
+    </top>
 
-      <Label layoutX="20.0" layoutY="110.0" text="Preco Custo"><font><Font name="System Bold" size="12.0" /></font></Label>
-      <TextField fx:id="txtPrecoCusto" layoutX="20.0" layoutY="130.0" prefWidth="100.0" promptText="R$" />
+    <!-- 🔹 CONTEÚDO -->
+    <center>
+        <VBox spacing="15" style="-fx-padding: 20;">
 
-      <Label layoutX="135.0" layoutY="110.0" text="Margem (%)"><font><Font name="System Bold" size="12.0" /></font></Label>
-      <TextField fx:id="txtMargemLucro" layoutX="135.0" layoutY="130.0" prefWidth="80.0" promptText=" %" />
+            <!-- 🔍 BUSCA -->
+            <HBox spacing="10">
+                <TextField fx:id="txtBuscar"
+                           promptText="Buscar produto..."
+                           HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnBuscar"
+                        text="Buscar"
+                        onAction="#Pesquisar"
+                        style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+            </HBox>
 
-      <Label layoutX="230.0" layoutY="110.0" text="Estoque Minimo"><font><Font name="System Bold" size="12.0" /></font></Label>
-      <TextField fx:id="txtEstoqueMinimo" layoutX="230.0" layoutY="130.0" prefWidth="100.0" promptText="unidades" />
+            <!-- 💰 CUSTO / LUCRO -->
+            <GridPane hgap="10" vgap="10">
 
-      <Button fx:id="btnCalcularPreco" layoutX="350.0" layoutY="128.0" prefWidth="120.0" text="Calcular Preco" />
+                <Label text="Preço Custo:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtPrecoCusto" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-      <Label layoutX="20.0" layoutY="170.0" text="ID"><font><Font name="System Bold" size="12.0" /></font></Label>
-      <TextField fx:id="txtID" disable="true" layoutX="20.0" layoutY="190.0" prefWidth="70.0" promptText="000000" />
+                <Label text="Margem (%):" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                <TextField fx:id="txtMargemLucro" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
 
-      <Label layoutX="105.0" layoutY="170.0" text="Cod. Barras"><font><Font name="System Bold" size="12.0" /></font></Label>
-      <TextField fx:id="txtCodBarras" layoutX="105.0" layoutY="190.0" prefWidth="150.0" promptText="Codigo de Barras" />
+                <Label text="Estoque Mínimo:" GridPane.rowIndex="0" GridPane.columnIndex="4"/>
+                <TextField fx:id="txtEstoqueMinimo" GridPane.rowIndex="0" GridPane.columnIndex="5"/>
 
-      <Label layoutX="270.0" layoutY="170.0" text="Nome"><font><Font name="System Bold" size="12.0" /></font></Label>
-      <TextField fx:id="txtNome" layoutX="270.0" layoutY="190.0" prefWidth="200.0" promptText="Nome do Produto" />
+                <Button fx:id="btnCalcularPreco"
+                        text="Calcular Preço"
+                        GridPane.rowIndex="0"
+                        GridPane.columnIndex="6"
+                        style="-fx-background-color: #8e44ad; -fx-text-fill: white;"/>
 
-      <Label layoutX="20.0" layoutY="230.0" text="Descricao"><font><Font name="System Bold" size="12.0" /></font></Label>
-      <TextField fx:id="txtDescricao" layoutX="20.0" layoutY="250.0" prefWidth="300.0" promptText="Descricao" />
+            </GridPane>
 
-      <Label layoutX="335.0" layoutY="230.0" text="Categoria"><font><Font name="System Bold" size="12.0" /></font></Label>
-      <TextField fx:id="txtCategoria" layoutX="335.0" layoutY="250.0" prefWidth="150.0" promptText="Categoria" />
+            <!-- 📦 DADOS DO PRODUTO -->
+            <GridPane hgap="10" vgap="10">
 
-      <Label layoutX="20.0" layoutY="290.0" text="Preco Venda"><font><Font name="System Bold" size="12.0" /></font></Label>
-      <TextField fx:id="txtPreco" layoutX="20.0" layoutY="310.0" prefWidth="100.0" promptText="R$" />
+                <Label text="ID:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtID" disable="true" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-      <Label layoutX="135.0" layoutY="290.0" text="Qtd. Atual"><font><Font name="System Bold" size="12.0" /></font></Label>
-      <TextField fx:id="txtQuantidade" disable="true" layoutX="135.0" layoutY="310.0" prefWidth="80.0" promptText="0" />
+                <Label text="Cod. Barras:" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                <TextField fx:id="txtCodBarras" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
 
-      <Button fx:id="btnExcluir" layoutX="240.0" layoutY="310.0" onAction="#Excluir" prefWidth="80.0" text="Excluir"><font><Font name="System Bold" size="12.0" /></font></Button>
-      <Button fx:id="btnSalvar" layoutX="340.0" layoutY="310.0" onAction="#Salvar" prefWidth="80.0" text="Salvar"><font><Font name="System Bold" size="12.0" /></font></Button>
-      <Button layoutX="440.0" layoutY="310.0" onAction="#Novo" prefWidth="70.0" text="Novo"><font><Font name="System Bold" size="12.0" /></font></Button>
+                <Label text="Nome:" GridPane.rowIndex="0" GridPane.columnIndex="4"/>
+                <TextField fx:id="txtNome" GridPane.rowIndex="0" GridPane.columnIndex="5"/>
 
-      <TableView fx:id="tabProdutos" layoutX="20.0" layoutY="350.0" prefHeight="150.0" prefWidth="660.0">
-        <columns>
-          <TableColumn fx:id="colID" prefWidth="60.0" text="ID" />
-          <TableColumn fx:id="colNome" prefWidth="160.0" text="Nome" />
-          <TableColumn fx:id="colCodBarras" prefWidth="120.0" text="Cod.Barras" />
-          <TableColumn fx:id="colDescricao" prefWidth="140.0" text="Descricao" />
-          <TableColumn fx:id="colCategoria" prefWidth="80.0" text="Categoria" />
-          <TableColumn fx:id="colPreco" prefWidth="80.0" text="Preco" />
-          <TableColumn fx:id="colQtd" prefWidth="60.0" text="Qtd" />
-        </columns>
-      </TableView>
-   </children>
-</AnchorPane>
+                <Label text="Descrição:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtDescricao" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+
+                <Label text="Categoria:" GridPane.rowIndex="1" GridPane.columnIndex="4"/>
+                <TextField fx:id="txtCategoria" GridPane.rowIndex="1" GridPane.columnIndex="5"/>
+
+                <Label text="Preço Venda:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtPreco" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Qtd Atual:" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                <TextField fx:id="txtQuantidade" disable="true" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+
+            </GridPane>
+
+            <!-- 🔘 BOTÕES -->
+            <HBox spacing="10">
+
+                <Button fx:id="btnSalvar"
+                        text="Salvar"
+                        onAction="#Salvar"
+                        style="-fx-background-color: #27ae60; -fx-text-fill: white;" />
+
+                <Button text="Novo"
+                        onAction="#Novo"
+                        style="-fx-background-color: #7f8c8d; -fx-text-fill: white;" />
+
+                <Button fx:id="btnExcluir"
+                        text="Excluir"
+                        onAction="#Excluir"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white;" />
+
+            </HBox>
+
+            <!-- 📊 TABELA -->
+            <TableView fx:id="tabProdutos" prefHeight="250">
+
+                <columns>
+                    <TableColumn fx:id="colID" text="ID" prefWidth="70"/>
+                    <TableColumn fx:id="colNome" text="Nome" prefWidth="180"/>
+                    <TableColumn fx:id="colCodBarras" text="Cod.Barras" prefWidth="140"/>
+                    <TableColumn fx:id="colDescricao" text="Descrição" prefWidth="160"/>
+                    <TableColumn fx:id="colCategoria" text="Categoria" prefWidth="120"/>
+                    <TableColumn fx:id="colPreco" text="Preço" prefWidth="100"/>
+                    <TableColumn fx:id="colQtd" text="Qtd" prefWidth="80"/>
+                </columns>
+
+            </TableView>
+
+        </VBox>
+    </center>
+
+</BorderPane>

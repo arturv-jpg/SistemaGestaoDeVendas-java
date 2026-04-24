@@ -1,54 +1,92 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="500.0" prefWidth="700.0"
- xmlns="http://javafx.com/javafx/25"
- xmlns:fx="http://javafx.com/fxml/1"
- fx:controller="application.controller.CadastroClienteController">
+<BorderPane xmlns="http://javafx.com/javafx/24"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="application.controller.CadastroClienteController"
+            style="-fx-background-color: #f4f6f8;">
 
-   <children>
+    <!-- 🔹 TOPO -->
+    <top>
+        <HBox style="-fx-padding: 15; -fx-background-color: #ffffff;">
+            <Label text="Cadastro de Clientes"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+        </HBox>
+    </top>
 
-      <Label text="Cadastro de Clientes" layoutX="200" layoutY="20">
-         <font>
-            <Font size="18"/>
-         </font>
-      </Label>
+    <!-- 🔹 CONTEÚDO -->
+    <center>
+        <VBox spacing="15" style="-fx-padding: 20;">
 
-      <!-- CAMPOS -->
-      <TextField fx:id="txtID" layoutX="30" layoutY="80" promptText="ID" disable="true"/>
-      <TextField fx:id="txtNome" layoutX="100" layoutY="80" promptText="Nome"/>
-      <TextField fx:id="txtCPF" layoutX="300" layoutY="80" promptText="CPF ou CNPJ" />
-      <TextField fx:id="txtEmail" layoutX="450" layoutY="80" promptText="Email"/>
-      <ComboBox fx:id="cbStatus" layoutX="100" layoutY="120" prefWidth="150"/>
+            <!-- 🔎 BUSCA -->
+            <HBox spacing="10">
+                <TextField fx:id="txtBuscar"
+                           promptText="Buscar cliente..."
+                           HBox.hgrow="ALWAYS"/>
+                <Button text="Buscar"
+                        onAction="#Buscar"
+                        style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+            </HBox>
 
-      <!-- BOTÕES -->
-      <Button text="Salvar" layoutX="270" layoutY="120" onAction="#Salvar"/>
-      <Button text="Novo" layoutX="350" layoutY="120" onAction="#Novo"/>
-      <Button text="Buscar" layoutX="530" layoutY="50" onAction="#Buscar"/>
-      <Button text="Excluir"
-        layoutX="430"
-        layoutY="120"
-        onAction="#Excluir"/>
-      <!-- BUSCA -->
-      <TextField fx:id="txtBuscar" layoutX="30" layoutY="50" prefWidth="480" promptText="Buscar cliente..."/>
+            <!-- 🧾 FORMULÁRIO -->
+            <GridPane hgap="10" vgap="10">
 
-      <!-- TABELA -->
-      <TableView fx:id="tabClientes" layoutX="30" layoutY="180" prefWidth="640" prefHeight="150">
-         <columns>
-            <TableColumn fx:id="colID" text="ID" prefWidth="50"/>
-            <TableColumn fx:id="colNome" text="Nome" prefWidth="150"/>
-            <TableColumn fx:id="colCPF" text="CPF" prefWidth="150"/>
-            <TableColumn fx:id="colEmail" text="Email" prefWidth="150"/>
-            <TableColumn fx:id="colStatus" text="Status" prefWidth="100"/>
-         </columns>
-      </TableView>
+                <Label text="ID:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtID" GridPane.rowIndex="0" GridPane.columnIndex="1" disable="true"/>
 
-      <!-- HISTÓRICO -->
-      <Label text="Últimas compras" layoutX="30" layoutY="340"/>
-      <ListView fx:id="listaHistorico" layoutX="30" layoutY="360" prefWidth="640" prefHeight="100"/>
+                <Label text="Nome:" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                <TextField fx:id="txtNome" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
 
-   </children>
-</AnchorPane>
+                <Label text="CPF/CNPJ:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtCPF" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Email:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                <TextField fx:id="txtEmail" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                <Label text="Status:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="cbStatus" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="150"/>
+
+            </GridPane>
+
+            <!-- 🔘 BOTÕES -->
+            <HBox spacing="10">
+
+                <Button text="Salvar"
+                        onAction="#Salvar"
+                        style="-fx-background-color: #27ae60; -fx-text-fill: white;" />
+
+                <Button text="Novo"
+                        onAction="#Novo"
+                        style="-fx-background-color: #7f8c8d; -fx-text-fill: white;" />
+
+                <Button text="Excluir"
+                        onAction="#Excluir"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white;" />
+
+            </HBox>
+
+            <!-- 📊 TABELA -->
+            <TableView fx:id="tabClientes" prefHeight="250">
+
+                <columns>
+                    <TableColumn fx:id="colID" text="ID" prefWidth="60"/>
+                    <TableColumn fx:id="colNome" text="Nome" prefWidth="180"/>
+                    <TableColumn fx:id="colCPF" text="CPF/CNPJ" prefWidth="150"/>
+                    <TableColumn fx:id="colEmail" text="Email" prefWidth="200"/>
+                    <TableColumn fx:id="colStatus" text="Status" prefWidth="100"/>
+                </columns>
+
+            </TableView>
+
+            <!-- 📜 HISTÓRICO -->
+            <Label text="Últimas compras"
+                   style="-fx-font-weight: bold;"/>
+
+            <ListView fx:id="listaHistorico" prefHeight="120"/>
+
+        </VBox>
+    </center>
+
+</BorderPane>

@@ -127,7 +127,6 @@ public class ProdutoModel {
         }
     }
 
-    // LISTAR
     public List<ProdutoModel> ListarProdutos(String valor) {
         List<ProdutoModel> lista = new ArrayList<>();
 
@@ -136,10 +135,13 @@ public class ProdutoModel {
             PreparedStatement ps;
 
             if(valor == null || valor.isEmpty()) {
-                ps = conn.prepareStatement("SELECT * FROM produto");
+                ps = conn.prepareStatement(
+                    "SELECT * FROM produto WHERE ativo = true"
+                );
             } else {
                 ps = conn.prepareStatement(
-                    "SELECT * FROM produto WHERE nome LIKE ? OR descricao LIKE ? OR categoria LIKE ?"
+                    "SELECT * FROM produto WHERE ativo = true AND " +
+                    "(nome LIKE ? OR descricao LIKE ? OR categoria LIKE ?)"
                 );
 
                 String busca = "%" + valor + "%";
@@ -172,28 +174,41 @@ public class ProdutoModel {
         return lista;
     }
 
-    // EXCLUIR (sem alterações)
-    public void Excluir() {
+    public boolean Excluir() throws Exception {
         try(Connection conn = conexao.getConnection()) {
 
-            if(id > 0) {
-                PreparedStatement delMov = conn.prepareStatement(
-                    "DELETE FROM movimentacaoEstoque WHERE idProduto=?");
-                delMov.setInt(1, id);
-                delMov.executeUpdate();
-
-                PreparedStatement delProd = conn.prepareStatement(
-                    "DELETE FROM produto WHERE id=?");
-                delProd.setInt(1, id);
-                delProd.executeUpdate();
-
-                alerta("Produto Excluído!");
-            } else {
-                alerta("Produto não selecionado!");
+            if(id <= 0) {
+                throw new Exception("Produto não selecionado!");
             }
 
-        } catch(Exception e) {
-            e.printStackTrace();
+            // remove movimentações
+            PreparedStatement delMov = conn.prepareStatement(
+                "DELETE FROM movimentacaoEstoque WHERE idProduto=?");
+            delMov.setInt(1, id);
+            delMov.executeUpdate();
+
+            // tenta excluir produto
+            PreparedStatement delProd = conn.prepareStatement(
+                "DELETE FROM produto WHERE id=?");
+            delProd.setInt(1, id);
+
+            int linhas = delProd.executeUpdate();
+
+            if (linhas == 0) {
+                throw new Exception("Produto não encontrado.");
+            }
+
+            return true;
+
+        } catch (Exception e) {
+
+            if(e.getMessage().toLowerCase().contains("foreign key") ||
+               e.getMessage().toLowerCase().contains("constraint")) {
+
+                throw new Exception("PRODUTO_COM_VENDA");
+            }
+
+            throw e;
         }
     }
 
@@ -282,5 +297,18 @@ public class ProdutoModel {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setContentText(msg);
         a.showAndWait();
+    }
+    public void desativar() {
+        try (Connection conn = conexao.getConnection()) {
+
+            PreparedStatement ps = conn.prepareStatement(
+                "UPDATE produto SET ativo = false WHERE id = ?"
+            );
+            ps.setInt(1, id);
+            ps.executeUpdate();
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 }

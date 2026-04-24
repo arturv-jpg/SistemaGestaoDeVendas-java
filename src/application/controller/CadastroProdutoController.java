@@ -9,6 +9,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -16,10 +17,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 
 public class CadastroProdutoController {
     
-    @FXML private AnchorPane paneFundo;
+	@FXML private BorderPane paneFundo;
 
     @FXML private TextField txtID;
     @FXML private TextField txtQuantidade;
@@ -138,16 +140,52 @@ public class CadastroProdutoController {
     }
 
     // ================= EXCLUIR =================
+    @FXML
     public void Excluir() {
-        if (produto.getID() <= 0) {
-            Alert mensagem = new Alert(Alert.AlertType.WARNING);
-            mensagem.setContentText("Nenhum produto selecionado!");
-            mensagem.showAndWait();
+
+        ProdutoModel selecionado = tabProdutos.getSelectionModel().getSelectedItem();
+
+        if (selecionado == null) {
+            alerta("Selecione um produto!");
             return;
         }
-        produto.Excluir();
-        Novo();
-        ListarProdutosTab(null);
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setContentText("Deseja realmente excluir este produto?");
+
+        confirm.showAndWait().ifPresent(resposta -> {
+
+            if (resposta == ButtonType.OK) {
+
+                try {
+
+                    selecionado.Excluir();
+
+                    alerta("Produto excluído com sucesso!");
+
+                } catch (Exception e) {
+
+                    if ("PRODUTO_COM_VENDA".equals(e.getMessage())) {
+
+                        Alert a = new Alert(Alert.AlertType.CONFIRMATION);
+                        a.setContentText("Produto já possui vendas.\nDeseja desativar?");
+
+                        a.showAndWait().ifPresent(resp -> {
+                            if (resp == ButtonType.OK) {
+                                selecionado.desativar();
+                                alerta("Produto desativado!");
+                            }
+                        });
+
+                    } else {
+                        alerta("Erro ao excluir: " + e.getMessage());
+                    }
+                }
+
+                ListarProdutosTab(null);
+                Novo();
+            }
+        });
     }
 
     // ================= CLICK FORA =================

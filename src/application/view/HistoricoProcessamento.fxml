@@ -1,51 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.DatePicker?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.HistoricoController">
-   <children>
-      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="244.0" layoutY="30.0" style="-fx-background-color: gray;" text="Histórico de Processamento" textAlignment="CENTER" textFill="WHITE" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <Label fx:id="lblProd" alignment="CENTER" layoutX="293.0" layoutY="59.0" text="Produto" textAlignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </Label>
-      <TableView fx:id="tabHistorico" layoutX="22.0" layoutY="161.0" prefHeight="219.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-        <columns>
-          <TableColumn fx:id="colID" prefWidth="63.20001220703125" text="ID" />
-          <TableColumn fx:id="colData" prefWidth="110.4000244140625" text="Data" />
-          <TableColumn fx:id="colIdProd" prefWidth="101.5999755859375" text="ID Produto" />
-          <TableColumn fx:id="colNome" prefWidth="168.79998779296875" text="Nome" />
-          <TableColumn fx:id="colTipo" prefWidth="87.20001220703125" text="Tipo" />
-          <TableColumn fx:id="colQtd" prefWidth="70.40008544921875" text="Qtd" />
-        </columns>
-      </TableView>
-      <DatePicker fx:id="dtInicio" layoutX="69.0" layoutY="120.0" prefHeight="26.0" prefWidth="131.0" />
-      <DatePicker fx:id="dtFinal" layoutX="264.0" layoutY="120.0" prefHeight="26.0" prefWidth="131.0" />
-      <Button fx:id="btnBuscar" layoutX="427.0" layoutY="121.0" mnemonicParsing="false" text="Buscar" onAction="#buscar">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </Button>
-      <Label layoutX="69.0" layoutY="100.0" text="Data Inicio">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </Label>
-      <Label layoutX="273.0" layoutY="100.0" text="Data Final">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </Label>
-   </children>
-</AnchorPane>
+<StackPane xmlns="http://javafx.com/javafx/24"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="application.controller.HistoricoController"
+           style="-fx-background-color: #ecf0f1;">
+
+    <VBox spacing="15"
+          maxWidth="900"
+          alignment="TOP_CENTER"
+          style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10;">
+
+        <!-- TÍTULO -->
+        <Label text="Histórico de Processamento"
+               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+
+        <!-- PRODUTO -->
+        <Label fx:id="lblProd"
+               text="Produto"
+               style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+
+        <!-- FILTROS -->
+        <HBox spacing="10" alignment="CENTER">
+            <VBox spacing="5">
+                <Label text="Data Início"/>
+                <DatePicker fx:id="dtInicio"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Data Final"/>
+                <DatePicker fx:id="dtFinal"/>
+            </VBox>
+
+            <Button fx:id="btnBuscar"
+                    text="Buscar"
+                    style="-fx-background-color: #2980b9; -fx-text-fill: white;"
+                    onAction="#buscar"/>
+        </HBox>
+
+        <!-- TABELA -->
+        <TableView fx:id="tabHistorico" prefHeight="400">
+
+            <columns>
+                <TableColumn fx:id="colID" text="ID" prefWidth="60"/>
+                <TableColumn fx:id="colData" text="Data" prefWidth="120"/>
+                <TableColumn fx:id="colIdProd" text="ID Produto" prefWidth="100"/>
+                <TableColumn fx:id="colNome" text="Nome" prefWidth="180"/>
+                <TableColumn fx:id="colTipo" text="Tipo" prefWidth="100"/>
+                <TableColumn fx:id="colQtd" text="Qtd" prefWidth="80"/>
+            </columns>
+
+        </TableView>
+
+    </VBox>
+
+</StackPane>
